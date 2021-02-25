@@ -1,0 +1,18 @@
+#! /bin/sh -e
+
+CUSTOM_ACPI="/boot/acpi_override"
+
+prefix=/usr
+exec_prefix={$prefix}
+libdir=${exec_prefix}/share
+
+. ${libdir}/grub/grub-mkconfig_lib
+
+if [ x${CUSTOM_ACPI} != x ] && [ -f ${CUSTOM_ACPI} ] && is_path_readable_by_grub ${CUSTOM_ACPI}; then
+	echo "Found custom ACPI table: ${CUSTOM_ACPI}" >&2
+	prepare_grub_to_access_device `${grub_probe} --target=device ${CUSTOM_ACPI}` | sed -e "s/^/  /"
+	cat << EOF
+	acpi(\$root)`make_system_path_relative_to_its_root ${CUSTOM_ACPI}`
+EOF
+fi
+	
